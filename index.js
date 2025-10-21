@@ -2,8 +2,10 @@ import "dotenv/config";
 import express from "express";
 import axios from "axios";
 
+const port = process.env.PORT || 3000;
 const app = express();
-const port = 3000;
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 const {
   OSKI_APP_CONSUMER_KEY,
@@ -40,11 +42,10 @@ const generateMpesaQr = async () => {
   })
 
   console.log(res.data)
-
+  return res.data
 }
-
 const stkPush = async () => {
-  const res = await axios.post(MPESA_STK_URL, {
+   const res = await axios.post(MPESA_STK_URL, {
     BusinessShortCode: "174379",
     Password: Buffer.from("174379" + MPESA_PASS_KEY + new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14)).toString("base64"),
      Timestamp: new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14),
@@ -61,11 +62,19 @@ const stkPush = async () => {
    headers: { Authorization: `Bearer ` + await getMpesaAccessToken()}
  });
 
-  console.log(res.data)
-};
+ console.log(res)
+ return res.data
+}
+
+// stkPush()
+// generateMpesaQr()
 
 
-
+app.get('/hello', (req, res) => {
+  res.status(200).json({
+    message: 'Hello World'
+  })
+})
 
 app.get("/", (req, res) => {
   res.send("Application active!");
