@@ -75,7 +75,7 @@ app.post('/api/mpesa/qr', async (req, res) => {
     RefNo: "ORDER1234",
     Amount: "1500",
     TrxCode: "SM",        // PB for PayBill, till number uses ST
-    CPI: req.body.customerNumber ,        // your PayBill or Till number
+    CPI: 254706577789 ,        // your PayBill or Till number
     Size: "300"  
   }, {
     headers: { Authorization: `Bearer ` + await getMpesaAccessToken()}
