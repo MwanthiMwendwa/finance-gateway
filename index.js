@@ -53,7 +53,7 @@ const stkPush = async () => {
     PartyA: "254706577789",
     PartyB: "174379",
     PhoneNumber: "254706577789",
-    CallBackURL: "https://mydomain.com/pat",
+    CallBackURL: "https://finance-gateway.onrender.com/api/mpesa/callback",
     AccountReference: "Grog",
     TransactionDesc: "Being purchase of Glenfiddich 18yrs",
   },
@@ -70,6 +70,12 @@ const stkPush = async () => {
 app.get("/", (req, res) => {
   res.send("Application active!");
 });
+
+app.post('/api/mpesa/callback', (req, res) => {
+  const { Body } = req.body
+
+  console.log(Body)
+})
 
 app.listen(port, () => {
   console.log(`App runing on ${port}`);
