@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import axios from "axios";
 
-const port = process.env.PORT || 7070;
+const port = process.env.PORT || 8080;
 const app = express();
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -70,30 +70,46 @@ const stkPush = async () => {
 // generateMpesaQr()
 
 app.post('/api/mpesa/qr', async (req, res) => {
-try {
-   const res = await axios.post(MPESA_QR_URL, {
+   const response = await axios.post(MPESA_QR_URL, {
     MerchantName: "Grog",
     RefNo: "ORDER1234",
     Amount: "1500",
     TrxCode: "SM",        // PB for PayBill, till number uses ST
-    CPI: "254706577789",        // your PayBill or Till number
+    CPI: req.body.customerNumber ,        // your PayBill or Till number
     Size: "300"  
   }, {
     headers: { Authorization: `Bearer ` + await getMpesaAccessToken()}
   })
-
-  console.log(res.data)
   res.status(200).json({
     status: 'success',
-    data: res.data
+    data: response.data
   })
   
-} catch (error) {
-  res.status(400).json({
-    status: 'failed',
-    message: error
+
+})
+
+app.post('/api/mpesa/stk', async (req, res) => {
+   const response = await axios.post(MPESA_STK_URL, {
+    BusinessShortCode: "174379",
+    Password: Buffer.from("174379" + MPESA_PASS_KEY + new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14)).toString("base64"),
+     Timestamp: new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14),
+    TransactionType: "CustomerPayBillOnline",
+    Amount: "1",
+    PartyA: "254706577789",
+    PartyB: "174379",
+    PhoneNumber: "254706577789",
+    CallBackURL: "https://finance-gateway.onrender.com/api/mpesa/callback",
+    AccountReference: "Grog",
+    TransactionDesc: "Being purchase of Glenfiddich 18yrs",
+  },
+ {
+   headers: { Authorization: `Bearer ` + await getMpesaAccessToken()}
+ });
+
+  res.status(200).json({
+    status: 'success',
+    data: response.data
   })
-}
 })
 
 app.get("/", (req, res) => {
@@ -102,7 +118,6 @@ app.get("/", (req, res) => {
 
 app.post('/api/mpesa/callback', (req, res) => {
   const { Body } = req.body
-
   console.log(Body)
 })
 
