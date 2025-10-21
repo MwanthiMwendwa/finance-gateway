@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import axios from "axios";
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 7070;
 const app = express();
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -69,11 +69,31 @@ const stkPush = async () => {
 // stkPush()
 // generateMpesaQr()
 
-
-app.get('/hello', (req, res) => {
-  res.status(200).json({
-    message: 'Hello World'
+app.post('/api/mpesa/qr', async (req, res) => {
+try {
+   const res = await axios.post(MPESA_QR_URL, {
+    MerchantName: "Grog",
+    RefNo: "ORDER1234",
+    Amount: "1500",
+    TrxCode: "SM",        // PB for PayBill, till number uses ST
+    CPI: "254706577789",        // your PayBill or Till number
+    Size: "300"  
+  }, {
+    headers: { Authorization: `Bearer ` + await getMpesaAccessToken()}
   })
+
+  console.log(res.data)
+  res.status(200).json({
+    status: 'success',
+    data: res.data
+  })
+  
+} catch (error) {
+  res.status(400).json({
+    status: 'failed',
+    message: error
+  })
+}
 })
 
 app.get("/", (req, res) => {
